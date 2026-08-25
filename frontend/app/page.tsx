@@ -3,13 +3,20 @@
 import React from 'react';
 import { useGameWebSocket } from '../hooks/useGameWebSocket';
 import { BoardCanvas } from '../components/BoardCanvas';
+import { ControlPanel } from '../components/ControlPanel';
 
 export default function Home() {
   const {
     status,
     error,
     gameState,
+    startSimulation,
+    pauseSimulation,
+    stepSimulation,
+    resetSimulation,
   } = useGameWebSocket();
+
+  const isConnected = status === 'connected';
 
   return (
     <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto', fontFamily: 'sans-serif', textAlign: 'center' }}>
@@ -17,7 +24,7 @@ export default function Home() {
         Conway&apos;s Game of Life
       </h1>
       <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-        Status: <strong style={{ color: status === 'connected' ? 'var(--accent-cyan)' : 'var(--text-muted)' }}>{status}</strong>
+        Status: <strong style={{ color: isConnected ? 'var(--accent-cyan)' : 'var(--text-muted)' }}>{status}</strong>
       </p>
 
       {error && (
@@ -36,6 +43,16 @@ export default function Home() {
       ) : (
         <p style={{ color: 'var(--text-muted)' }}>Connecting and loading board state...</p>
       )}
+
+      {/* Basic Simulation Toggles */}
+      <ControlPanel
+        is_running={gameState.is_running}
+        isConnected={isConnected}
+        onStart={startSimulation}
+        onPause={pauseSimulation}
+        onStep={stepSimulation}
+        onReset={resetSimulation}
+      />
 
       <div style={{ marginTop: '1.5rem', color: 'var(--text-muted)' }}>
         <p>Generation: {gameState.generation} | Live Cells: {gameState.live_count}</p>
