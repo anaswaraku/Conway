@@ -14,6 +14,7 @@ export default function Home() {
     pauseSimulation,
     stepSimulation,
     resetSimulation,
+    setCell,
   } = useGameWebSocket();
 
   const isConnected = status === 'connected';
@@ -39,6 +40,7 @@ export default function Home() {
           grid={gameState.grid}
           width={gameState.width}
           height={gameState.height}
+          onCellToggle={setCell}
         />
       ) : (
         <p style={{ color: 'var(--text-muted)' }}>Connecting and loading board state...</p>

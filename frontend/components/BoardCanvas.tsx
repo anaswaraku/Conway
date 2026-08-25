@@ -5,10 +5,14 @@ interface BoardCanvasProps {
   width: number;
   height: number;
   cellSize?: number;
+  onCellToggle?: (x: number, y: number, alive: boolean) => void;
 }
 
-export function BoardCanvas({ grid, width, height, cellSize = 12 }: BoardCanvasProps) {
+export function BoardCanvas({ grid, width, height, cellSize = 12, onCellToggle }: BoardCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const isDrawingRef = useRef<boolean>(false);
+  const drawValueRef = useRef<boolean>(true); // true to draw alive, false to erase
+  const lastCellRef = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -17,17 +21,14 @@ export function BoardCanvas({ grid, width, height, cellSize = 12 }: BoardCanvasP
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Calculate canvas size based on cells and dimensions
     const canvasWidth = width * cellSize;
     const canvasHeight = height * cellSize;
 
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
 
-    // Clear canvas
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-    // Get styling values from theme CSS variables (fall back to defaults if not loaded)
     const aliveColor = getComputedStyle(document.documentElement).getPropertyValue("--cell-alive").trim() || "#00f2fe";
     const deadColor = getComputedStyle(document.documentElement).getPropertyValue("--cell-dead").trim() || "#111827";
     const gridColor = getComputedStyle(document.documentElement).getPropertyValue("--grid-line").trim() || "rgba(255, 255, 255, 0.04)";
@@ -45,7 +46,6 @@ export function BoardCanvas({ grid, width, height, cellSize = 12 }: BoardCanvasP
     ctx.strokeStyle = gridColor;
     ctx.lineWidth = 0.5;
 
-    // Vertical lines
     for (let x = 0; x <= width; x++) {
       ctx.beginPath();
       ctx.moveTo(x * cellSize, 0);
@@ -53,7 +53,6 @@ export function BoardCanvas({ grid, width, height, cellSize = 12 }: BoardCanvasP
       ctx.stroke();
     }
 
-    // Horizontal lines
     for (let y = 0; y <= height; y++) {
       ctx.beginPath();
       ctx.moveTo(0, y * cellSize);
@@ -62,14 +61,55 @@ export function BoardCanvas({ grid, width, height, cellSize = 12 }: BoardCanvasP
     }
   }, [grid, width, height, cellSize]);
 
+  const handleCellAction = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas || !onCellToggle) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const clientX = event.clientX - rect.left;
+    const clientY = event.clientY - rect.top;
+
+    const cellX = Math.floor(clientX / cellSize);
+    const cellY = Math.floor(clientY / cellSize);
+
+    // Validate bounds
+    if (cellX >= 0 && cellX < width && cellY >= 0 && cellY < height) {
+      // Avoid duplicate trigger on same cell in same drag move
+      if (lastCellRef.current?.x === cellX && lastCellRef.current?.y === cellY) {
+        return;
+      }
+      lastCellRef.current = { x: cellX, y: cellY };
+
+      if (event.type === "mousedown") {
+        isDrawingRef.current = true;
+        // If cell is dead (0), we draw alive (true). If cell is alive (1), we draw dead (false).
+        const isCurrentlyAlive = grid[cellY]?.[cellX] === 1;
+        drawValueRef.current = !isCurrentlyAlive;
+        onCellToggle(cellX, cellY, drawValueRef.current);
+      } else if (event.type === "mousemove" && isDrawingRef.current) {
+        onCellToggle(cellX, cellY, drawValueRef.current);
+      }
+    }
+  };
+
+  const handleMouseUpOrLeave = () => {
+    isDrawingRef.current = false;
+    lastCellRef.current = null;
+  };
+
   return (
     <div style={{ overflow: "auto", display: "flex", justifyContent: "center", padding: "1rem" }}>
       <canvas
         ref={canvasRef}
+        onMouseDown={handleCellAction}
+        onMouseMove={handleCellAction}
+        onMouseUp={handleMouseUpOrLeave}
+        onMouseLeave={handleMouseUpOrLeave}
         style={{
           border: "1px solid var(--bg-card-border)",
           borderRadius: "8px",
           boxShadow: "0 4px 20px rgba(0, 0, 0, 0.5)",
+          cursor: "crosshair",
         }}
       />
     </div>
