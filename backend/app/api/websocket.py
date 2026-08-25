@@ -121,6 +121,7 @@ async def websocket_game_endpoint(websocket: WebSocket):
             elif msg.type == "load_preset":
                 if msg.pattern_id is not None:
                     try:
+                        engine.pause()
                         load_preset(board, msg.pattern_id)
                         engine.generation = 0
                         await send_state()
