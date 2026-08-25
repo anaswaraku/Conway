@@ -1,14 +1,16 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useGameWebSocket } from '../hooks/useGameWebSocket';
 import { BoardCanvas } from '../components/BoardCanvas';
 import { ControlPanel } from '../components/ControlPanel';
+import { fetchPresetPatterns } from '../lib/api';
+import { PresetPattern } from '../lib/types';
 
 export default function Home() {
   const {
     status,
-    error,
+    error: wsError,
     gameState,
     startSimulation,
     pauseSimulation,
@@ -16,6 +18,23 @@ export default function Home() {
     resetSimulation,
     setCell,
   } = useGameWebSocket();
+
+  // Pattern fetching states
+  const [patterns, setPatterns] = useState<PresetPattern[]>([]);
+  const [patternsLoading, setPatternsLoading] = useState<boolean>(true);
+  const [patternsError, setPatternsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchPresetPatterns()
+      .then((data) => {
+        setPatterns(data);
+        setPatternsLoading(false);
+      })
+      .catch((err) => {
+        setPatternsError(err.message || 'Failed to load patterns.');
+        setPatternsLoading(false);
+      });
+  }, []);
 
   const isConnected = status === 'connected';
 
@@ -28,9 +47,9 @@ export default function Home() {
         Status: <strong style={{ color: isConnected ? 'var(--accent-cyan)' : 'var(--text-muted)' }}>{status}</strong>
       </p>
 
-      {error && (
+      {wsError && (
         <div style={{ color: 'red', marginBottom: '1rem', padding: '0.5rem', border: '1px solid red', borderRadius: '8px' }}>
-          {error}
+          {wsError}
         </div>
       )}
 
@@ -58,6 +77,22 @@ export default function Home() {
 
       <div style={{ marginTop: '1.5rem', color: 'var(--text-muted)' }}>
         <p>Generation: {gameState.generation} | Live Cells: {gameState.live_count}</p>
+      </div>
+
+      {/* Patterns loading display checklist */}
+      <div style={{ marginTop: '2rem', padding: '1rem', border: '1px solid var(--bg-card-border)', borderRadius: '12px' }}>
+        <h3>Available Presets Checklist</h3>
+        {patternsLoading && <p>Loading patterns...</p>}
+        {patternsError && <p style={{ color: 'red' }}>Error loading patterns: {patternsError}</p>}
+        {!patternsLoading && !patternsError && (
+          <ul style={{ listStyle: 'none', padding: 0, display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+            {patterns.map((p) => (
+              <li key={p.id} style={{ background: '#1e293b', padding: '0.25rem 0.5rem', borderRadius: '6px', fontSize: '0.85rem' }}>
+                {p.name} ({p.cell_count} cells)
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );
