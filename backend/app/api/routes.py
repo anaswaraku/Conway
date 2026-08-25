@@ -43,7 +43,7 @@ def initialize_board(config: BoardConfig):
         return board.to_dict()
     except ValueError as e:
         raise HTTPException(
-            status_code=status.HTTP_420_METHOD_FAILURE,
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=str(e)
         )
 

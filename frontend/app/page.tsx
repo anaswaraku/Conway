@@ -6,17 +6,19 @@ import { BoardCanvas } from '../components/BoardCanvas';
 import { ControlPanel } from '../components/ControlPanel';
 import { PresetSelector } from '../components/PresetSelector';
 import { fetchPresetPatterns } from '../lib/api';
-import { PresetPattern } from '../lib/types';
+import { PresetPattern, BoundaryMode } from '../lib/types';
 
 export default function Home() {
   const {
     status,
     error: wsError,
     gameState,
+    initBoard,
     startSimulation,
     pauseSimulation,
     stepSimulation,
     resetSimulation,
+    setSpeed,
     setCell,
     loadPresetPattern,
   } = useGameWebSocket();
@@ -39,6 +41,10 @@ export default function Home() {
   }, []);
 
   const isConnected = status === 'connected';
+
+  const handleBoundaryModeChange = (mode: BoundaryMode) => {
+    initBoard(gameState.width, gameState.height, mode);
+  };
 
   return (
     <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto', fontFamily: 'sans-serif', textAlign: 'center' }}>
@@ -76,7 +82,7 @@ export default function Home() {
         />
       )}
 
-      {/* Basic Simulation Toggles */}
+      {/* Simulation Controls & Parameters */}
       <ControlPanel
         is_running={gameState.is_running}
         isConnected={isConnected}
@@ -84,6 +90,10 @@ export default function Home() {
         onPause={pauseSimulation}
         onStep={stepSimulation}
         onReset={resetSimulation}
+        speed={gameState.speed}
+        onSpeedChange={setSpeed}
+        boundaryMode={gameState.boundary_mode}
+        onBoundaryModeChange={handleBoundaryModeChange}
       />
 
       <div style={{ marginTop: '1.5rem', color: 'var(--text-muted)' }}>

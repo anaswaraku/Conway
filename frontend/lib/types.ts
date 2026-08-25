@@ -79,6 +79,7 @@ export interface WSServerStateUpdateMessage {
   live_count: number;
   is_running: boolean;
   speed: number;
+  boundary_mode?: BoundaryMode;
 }
 
 export interface WSServerErrorMessage {

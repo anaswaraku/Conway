@@ -30,6 +30,7 @@ async def websocket_game_endpoint(websocket: WebSocket):
             "live_count": state["live_count"],
             "is_running": engine.is_running,
             "speed": speed,
+            "boundary_mode": state["board"]["boundary_mode"],
         })
 
     async def ticker_loop():

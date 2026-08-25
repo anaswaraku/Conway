@@ -57,6 +57,7 @@ export function useGameWebSocket(url: string = "ws://127.0.0.1:8000/ws/game") {
             live_count: data.live_count,
             is_running: data.is_running,
             speed: data.speed,
+            boundary_mode: data.boundary_mode || prev.boundary_mode,
             // Keep local dimension mapping in sync if server grid size changes
             width: data.grid[0]?.length || prev.width,
             height: data.grid.length || prev.height,
