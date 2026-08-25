@@ -161,9 +161,3 @@ npx next build
 2. **HTML5 2D Canvas over DOM Grid**: Rendering a 50x50 (2,500 cells) matrix via HTML Canvas achieves 60+ FPS performance without React DOM node thrashing.
 3. **Single Async Ticker Loop**: Simulation runs on a background `asyncio` task loop that yields control via `asyncio.sleep()`, preventing duplicate ticker task accumulation.
 4. **Optimistic Local State Update**: Interactive canvas cell drawing immediately updates local React state for instantaneous user feedback while transmitting WebSocket state sync.
-
----
-
-## AI Assistance Disclosure
-
-AI coding tools were utilized during development for initial setup scaffold, test case generation, code auditing, and documentation formatting. All core algorithms, mathematical boundary calculations, and WebSocket synchronization logic were reviewed, verified, and audited.
