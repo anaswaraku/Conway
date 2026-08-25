@@ -42,3 +42,17 @@ class LoadPresetRequest(BaseModel):
     height: int = Field(50, ge=Board.MIN_SIZE, le=Board.MAX_SIZE)
     boundary_mode: BoundaryMode = Field(BoundaryMode.TOROIDAL)
     pattern_id: str
+
+
+class WSClientMessage(BaseModel):
+    type: str
+    width: Optional[int] = Field(None, ge=Board.MIN_SIZE, le=Board.MAX_SIZE)
+    height: Optional[int] = Field(None, ge=Board.MIN_SIZE, le=Board.MAX_SIZE)
+    boundary_mode: Optional[BoundaryMode] = None
+    initial_grid: Optional[List[List[int]]] = None
+    speed: Optional[int] = Field(None, ge=1, le=30)
+    x: Optional[int] = None
+    y: Optional[int] = None
+    alive: Optional[bool] = None
+    pattern_id: Optional[str] = None
+
