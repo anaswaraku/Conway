@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useGameWebSocket } from '../hooks/useGameWebSocket';
 import { BoardCanvas } from '../components/BoardCanvas';
 import { ControlPanel } from '../components/ControlPanel';
+import { PresetSelector } from '../components/PresetSelector';
 import { fetchPresetPatterns } from '../lib/api';
 import { PresetPattern } from '../lib/types';
 
@@ -17,6 +18,7 @@ export default function Home() {
     stepSimulation,
     resetSimulation,
     setCell,
+    loadPresetPattern,
   } = useGameWebSocket();
 
   // Pattern fetching states
@@ -65,6 +67,15 @@ export default function Home() {
         <p style={{ color: 'var(--text-muted)' }}>Connecting and loading board state...</p>
       )}
 
+      {/* Patterns dropdown selector */}
+      {!patternsLoading && !patternsError && (
+        <PresetSelector
+          patterns={patterns}
+          onLoadPreset={loadPresetPattern}
+          isConnected={isConnected}
+        />
+      )}
+
       {/* Basic Simulation Toggles */}
       <ControlPanel
         is_running={gameState.is_running}
@@ -77,22 +88,6 @@ export default function Home() {
 
       <div style={{ marginTop: '1.5rem', color: 'var(--text-muted)' }}>
         <p>Generation: {gameState.generation} | Live Cells: {gameState.live_count}</p>
-      </div>
-
-      {/* Patterns loading display checklist */}
-      <div style={{ marginTop: '2rem', padding: '1rem', border: '1px solid var(--bg-card-border)', borderRadius: '12px' }}>
-        <h3>Available Presets Checklist</h3>
-        {patternsLoading && <p>Loading patterns...</p>}
-        {patternsError && <p style={{ color: 'red' }}>Error loading patterns: {patternsError}</p>}
-        {!patternsLoading && !patternsError && (
-          <ul style={{ listStyle: 'none', padding: 0, display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '0.5rem' }}>
-            {patterns.map((p) => (
-              <li key={p.id} style={{ background: '#1e293b', padding: '0.25rem 0.5rem', borderRadius: '6px', fontSize: '0.85rem' }}>
-                {p.name} ({p.cell_count} cells)
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
     </div>
   );
