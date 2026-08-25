@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.api.routes import router as api_router
 
 app = FastAPI(
     title="Conway's Game of Life API",
@@ -15,6 +16,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount REST API Router
+app.include_router(api_router)
 
 @app.get("/api/health")
 async def health_check():
